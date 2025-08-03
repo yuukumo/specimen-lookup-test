@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("物件關聯性與倉儲查詢工具 (簡化結果顯示)")
+st.title("物件關聯性與倉儲查詢工具 (修正比對邏輯)")
 
 # 上傳清單 A：物件關聯性
 st.subheader("上傳清單 A（物件關聯性）")
@@ -35,46 +35,40 @@ if st.button("比對並查詢"):
             st.error(f"清單 B 缺少必要欄位: {required_inventory_cols}")
         else:
             input_list = [name.strip() for name in input_names.splitlines() if name.strip()]
-            matched_inventory = inventory_df[inventory_df["vernacularName"].isin(input_list)]
+            results_all = []
 
-            if not matched_inventory.empty:
-                results_all = []
+            for query_species in input_list:
+                # 在清單 A 的 vernacularName 中尋找匹配的 query_species
+                matched_relations = relations_df[relations_df["vernacularName"] == query_species]
 
-                for _, query_row in matched_inventory.iterrows():
-                    query_species = query_row["vernacularName"]
-                    
-                    related = relations_df[(relations_df["vernacularName"] == query_species) |
-                                           (relations_df["relatedVernacularName"] == query_species)]
+                if not matched_relations.empty:
+                    # 找到的 relatedVernacularName 再去清單 B 比對
+                    merged = pd.merge(
+                        matched_relations,
+                        inventory_df,
+                        left_on="relatedVernacularName",
+                        right_on="vernacularName",
+                        how="inner"
+                    )
 
-                    if not related.empty:
-                        merged = pd.merge(
-                            related,
-                            inventory_df.add_suffix("_related"),
-                            left_on="relatedVernacularName",
-                            right_on="vernacularName_related",
-                            how="left"
-                        )
-                        merged["querySpecies"] = query_species
+                    if not merged.empty:
+                        merged["查詢物種"] = query_species
+                        merged = merged[[
+                            "查詢物種",
+                            "relatedVernacularName",
+                            "storageLocation"
+                        ]]
+                        merged.rename(columns={
+                            "relatedVernacularName": "關聯物種",
+                            "storageLocation": "標本倉儲位置"
+                        }, inplace=True)
                         results_all.append(merged)
 
-                if results_all:
-                    result = pd.concat(results_all, ignore_index=True)
-                    result = result[[
-                        "querySpecies",
-                        "relatedVernacularName",
-                        "storageLocation_related"
-                    ]]
-                    result.rename(columns={
-                        "querySpecies": "查詢物種",
-                        "relatedVernacularName": "關聯物種",
-                        "storageLocation_related": "標本倉儲位置"
-                    }, inplace=True)
-
-                    st.success("以下是與輸入物種存在關聯的標本及倉儲位置：")
-                    st.dataframe(result)
-                else:
-                    st.warning("沒有找到與這些物種相關聯的物件。")
+            if results_all:
+                result = pd.concat(results_all, ignore_index=True)
+                st.success("以下是與輸入物種存在關聯的標本及倉儲位置：")
+                st.dataframe(result)
             else:
-                st.warning("輸入的物種名稱未在清單 B 中找到。")
+                st.warning("沒有找到與這些物種相關聯的物件或標本位置。")
     else:
         st.error("請確保已上傳清單 A 和清單 B，並輸入至少一個物種名稱。")
