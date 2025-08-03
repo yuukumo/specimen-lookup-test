@@ -1,7 +1,22 @@
 import streamlit as st
 import pandas as pd
 
+# 自訂 CSS：調整輸入框聚焦時的邊框顏色
+st.markdown(
+    """
+    <style>
+    textarea:focus {
+        border: 2px solid #66b3ff !important; /* 柔和藍色 */
+        box-shadow: 0 0 5px rgba(102, 179, 255, 0.5); /* 柔和陰影效果 */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.title("它會(或得)與誰打交道？")
+
+st.subheader("請告訴我您想多瞭解誰的「社交圈」")
 
 # GitHub Repo 原始檔案 URL
 url_relations = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_A_Relations.xlsx"
@@ -17,7 +32,6 @@ def load_data():
 relations_df, inventory_df = load_data()
 
 # 使用者輸入物種名稱
-st.subheader("請告訴我您想多瞭解誰的「社交圈」")
 input_names = st.text_area("請貼上您想查詢的物種中名清單（每行一個）：", height=200)
 
 if st.button("比對並查詢"):
@@ -58,9 +72,9 @@ if st.button("比對並查詢"):
 
             if results_all:
                 result = pd.concat(results_all, ignore_index=True)
-                st.success("以下是與您輸入物種存在關聯性的物種標本及倉儲位置：")
+                st.success("以下是與輸入物種存在關聯的標本及倉儲位置：")
                 st.dataframe(result)
             else:
-                st.warning("暫未找到與您輸入物種存在關聯性的物種標本。")
+                st.warning("沒有找到與這些物種相關聯的物件或標本位置。")
     else:
         st.error("請輸入至少一個物種名稱。")
