@@ -1,31 +1,29 @@
 import streamlit as st
 import pandas as pd
 
-st.title("物件關聯性與倉儲查詢工具 (修正比對邏輯)")
+st.title("物件關聯性與倉儲查詢工具 (自動讀取 GitHub 資料)")
 
-# 上傳清單 A：物件關聯性
-st.subheader("上傳清單 A（物件關聯性）")
-relations_file = st.file_uploader("請上傳 Excel 或 CSV 格式的清單 A", type=["xlsx", "csv"])
+# GitHub Repo 原始檔案 URL
+url_relations = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_A_Relations.xlsx"
+url_inventory = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_B_Inventory.xlsx"
 
-# 上傳清單 B：物種與倉儲位置
-st.subheader("上傳清單 B（物種與倉儲位置）")
-inventory_file = st.file_uploader("請上傳 Excel 或 CSV 格式的清單 B", type=["xlsx", "csv"])
+# 自動讀取清單 A 與 B
+@st.cache_data
+def load_data():
+    relations_df = pd.read_excel(url_relations)
+    inventory_df = pd.read_excel(url_inventory)
+    return relations_df, inventory_df
 
-# 輸入物種名稱
+relations_df, inventory_df = load_data()
+
+st.success("已從 GitHub 自動載入清單 A 與清單 B")
+
+# 使用者輸入物種名稱
 st.subheader("輸入物種名稱")
 input_names = st.text_area("請貼上要查詢的物種名稱（每行一個）：", height=200)
 
-def load_file(file):
-    if file.name.endswith('.csv'):
-        return pd.read_csv(file)
-    else:
-        return pd.read_excel(file)
-
 if st.button("比對並查詢"):
-    if relations_file and inventory_file and input_names.strip():
-        relations_df = load_file(relations_file)
-        inventory_df = load_file(inventory_file)
-
+    if input_names.strip():
         required_relations_cols = {"vernacularName", "relatedVernacularName", "relationshipOfResource"}
         required_inventory_cols = {"occurrenceID", "vernacularName", "storageLocation"}
 
@@ -38,11 +36,8 @@ if st.button("比對並查詢"):
             results_all = []
 
             for query_species in input_list:
-                # 在清單 A 的 vernacularName 中尋找匹配的 query_species
                 matched_relations = relations_df[relations_df["vernacularName"] == query_species]
-
                 if not matched_relations.empty:
-                    # 找到的 relatedVernacularName 再去清單 B 比對
                     merged = pd.merge(
                         matched_relations,
                         inventory_df,
@@ -50,7 +45,6 @@ if st.button("比對並查詢"):
                         right_on="vernacularName",
                         how="inner"
                     )
-
                     if not merged.empty:
                         merged["查詢物種"] = query_species
                         merged = merged[[
@@ -71,4 +65,4 @@ if st.button("比對並查詢"):
             else:
                 st.warning("沒有找到與這些物種相關聯的物件或標本位置。")
     else:
-        st.error("請確保已上傳清單 A 和清單 B，並輸入至少一個物種名稱。")
+        st.error("請輸入至少一個物種名稱。")
