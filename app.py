@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("物件關聯性與倉儲查詢工具 (自動讀取 GitHub 資料)")
+st.title("物件關聯性與倉儲查詢工具 (GitHub 版)")
 
 # GitHub Repo 原始檔案 URL
 url_relations = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_A_Relations.xlsx"
@@ -15,8 +15,6 @@ def load_data():
     return relations_df, inventory_df
 
 relations_df, inventory_df = load_data()
-
-st.success("已從 GitHub 自動載入清單 A 與清單 B")
 
 # 使用者輸入物種名稱
 st.subheader("輸入物種名稱")
