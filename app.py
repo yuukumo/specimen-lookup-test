@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
 
-# 自訂 CSS：調整輸入框聚焦時的邊框顏色
+# 自訂 CSS：調整輸入框聚焦時的邊框顏色 (柔和灰色)
 st.markdown(
     """
     <style>
     textarea:focus {
-        border: 2px solid #66b3ff !important; /* 柔和藍色 */
-        box-shadow: 0 0 5px rgba(102, 179, 255, 0.5); /* 柔和陰影效果 */
+        border: 2px solid #a9a9a9 !important; /* 柔和灰色 */
+        box-shadow: 0 0 5px rgba(169, 169, 169, 0.5); /* 灰色陰影效果 */
     }
     </style>
     """,
