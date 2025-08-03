@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("它會(或得)與誰打交道？")
+st.title("它都與誰打交道？")
 
 # GitHub Repo 原始檔案 URL
 url_relations = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_A_Relations.xlsx"
@@ -17,7 +17,7 @@ def load_data():
 relations_df, inventory_df = load_data()
 
 # 使用者輸入物種名稱
-st.subheader("請告訴我您想多瞭解誰的「社交圈」")
+st.subheader("請告訴我您想多瞭解哪種生物的「社交圈」")
 input_names = st.text_area("請貼上您想查詢的物種中名清單（每行一個）：", height=200)
 
 if st.button("比對並查詢"):
