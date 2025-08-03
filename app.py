@@ -17,7 +17,7 @@ def load_data():
 relations_df, inventory_df = load_data()
 
 # 使用者輸入物種名稱
-st.subheader("請告訴我你想多瞭解誰的社交圈")
+st.subheader("請告訴我您想多瞭解誰的「社交圈」")
 input_names = st.text_area("請貼上您想查詢的物種中名清單（每行一個）：", height=200)
 
 if st.button("比對並查詢"):
