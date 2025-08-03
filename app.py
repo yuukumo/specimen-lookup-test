@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("物件關聯性與倉儲查詢工具 (GitHub 版)")
+st.title("誰會與牠/它打交道？")
 
 # GitHub Repo 原始檔案 URL
 url_relations = "https://raw.githubusercontent.com/yuukumo/specimen-lookup-test/main/List_A_Relations.xlsx"
