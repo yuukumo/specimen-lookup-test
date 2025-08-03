@@ -1,8 +1,7 @@
 import streamlit as st
 import pandas as pd
-import random
 
-st.title("物件關聯性與倉儲查詢工具 (來源與關聯物種顏色標籤)")
+st.title("物件關聯性與倉儲查詢工具 (簡化結果顯示)")
 
 # 上傳清單 A：物件關聯性
 st.subheader("上傳清單 A（物件關聯性）")
@@ -11,10 +10,6 @@ relations_file = st.file_uploader("請上傳 Excel 或 CSV 格式的清單 A", t
 # 上傳清單 B：物種與倉儲位置
 st.subheader("上傳清單 B（物種與倉儲位置）")
 inventory_file = st.file_uploader("請上傳 Excel 或 CSV 格式的清單 B", type=["xlsx", "csv"])
-
-# 產生隨機顏色
-def random_color():
-    return f"#{random.randint(0, 0xFFFFFF):06x}"
 
 # 輸入物種名稱
 st.subheader("輸入物種名稱")
@@ -54,13 +49,6 @@ if st.button("比對並查詢"):
                     if not related.empty:
                         merged = pd.merge(
                             related,
-                            inventory_df.add_suffix("_resource"),
-                            left_on="vernacularName",
-                            right_on="vernacularName_resource",
-                            how="left"
-                        )
-                        merged = pd.merge(
-                            merged,
                             inventory_df.add_suffix("_related"),
                             left_on="relatedVernacularName",
                             right_on="vernacularName_related",
@@ -73,43 +61,17 @@ if st.button("比對並查詢"):
                     result = pd.concat(results_all, ignore_index=True)
                     result = result[[
                         "querySpecies",
-                        "vernacularName", "storageLocation_resource",
-                        "relatedVernacularName", "relationshipOfResource", "storageLocation_related"
+                        "relatedVernacularName",
+                        "storageLocation_related"
                     ]]
                     result.rename(columns={
                         "querySpecies": "查詢物種",
-                        "vernacularName": "來源物種",
-                        "storageLocation_resource": "來源物種標本與倉儲位置",
                         "relatedVernacularName": "關聯物種",
-                        "relationshipOfResource": "關聯性",
-                        "storageLocation_related": "關聯物種標本與倉儲位置"
+                        "storageLocation_related": "標本倉儲位置"
                     }, inplace=True)
 
-                    # 建立顏色映射
-                    unique_query = result["查詢物種"].unique()
-                    unique_source = result["來源物種"].unique()
-                    unique_related = result["關聯物種"].unique()
-
-                    query_color_map = {species: random_color() for species in unique_query}
-                    source_color_map = {species: random_color() for species in unique_source}
-                    related_color_map = {species: random_color() for species in unique_related}
-
-                    # 套用顏色標籤
-                    def highlight_species(row):
-                        styles = []
-                        for col in row.index:
-                            if col == "查詢物種":
-                                styles.append(f"background-color: {query_color_map.get(row[col], '#ffffff')}; font-weight: bold;")
-                            elif col == "來源物種":
-                                styles.append(f"background-color: {source_color_map.get(row[col], '#ffffff')};")
-                            elif col == "關聯物種":
-                                styles.append(f"background-color: {related_color_map.get(row[col], '#ffffff')};")
-                            else:
-                                styles.append("")
-                        return styles
-
-                    st.success("以下是與輸入物種存在關聯的物件與資訊：")
-                    st.dataframe(result.style.apply(highlight_species, axis=1))
+                    st.success("以下是與輸入物種存在關聯的標本及倉儲位置：")
+                    st.dataframe(result)
                 else:
                     st.warning("沒有找到與這些物種相關聯的物件。")
             else:
