@@ -4,8 +4,8 @@ import pandas as pd
 # 模擬清單 A（正式使用時可改成上傳 Excel/CSV 檔案）
 data = {
     "Object": ["Specimen1", "Specimen2", "Specimen3", "Specimen4"],
-    "Species Name": ["Panthera leo", "Homo sapiens", "Canis lupus", "Felis catus"],
-    "Storage Location": ["Shelf A1", "Shelf B2", "Shelf C3", "Shelf D4"]
+    "Species Name": ["白頭翁", "麻雀", "雀榕", "榕小蜂"],
+    "Storage Location": ["A1", "B2", "C3", "D4"]
 }
 df = pd.DataFrame(data)
 
